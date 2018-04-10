@@ -1,0 +1,42 @@
+import maya.cmds as cmds
+import json
+
+def loadJsonVtx(filename):
+    '''
+    Get vertex data from JsonFile and store them into dictionary
+    @param fileName Type the path of the file
+    @author roberto ciriaco 11/07/2016
+    '''
+    global data
+    #Declare array Data
+    data = []
+    #Load json file using loads
+    jsLoad = json.loads(open(filename).read())
+    vtxLoad = jsLoad['vertices']
+    #Iterate the dictionary file
+    for i in range(len(vtxLoad)):
+        vtxStore = vtxLoad[i]
+        #store data in "data[]"
+        data.append(vtxStore)
+    return data
+
+#Use this as example to run the function
+loadJsonVtx('C:\Users\ciroby\Desktop\data.json')
+
+def readVtx(dataList,vtxIndex,attrType = '',allData=0):
+    '''
+    Get vertex data from dictionary stored into local memory
+    @param dataList 
+    @param vtxIndex Insert the index of the vertex that you want to print position data
+    @param attrType Insert the type of data you want to print (position,colour,normal)
+    @param allData The default value is 0, put 1 if you want to print all vertex data for each vertex
+    @author roberto ciriaco 11/07/2016
+    '''
+    #Iterate the dictionary stored in a local variable 
+    for vtx in dataList:
+        type = vtx['type']
+        #Check if the vertex is of type complex or simple. If complex print all parameters, else print just some parameters
+        if type == 'complex':
+            if attrType == 'postion':
+               attr =  vtx['position']
+            if attrType == 'colour':
