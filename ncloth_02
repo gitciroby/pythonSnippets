@@ -1,0 +1,26 @@
+#mc.skinCluster('*cape*_jnt*','cape_skinned_geo',tsb = True)
+	#mc.skinCluster('*l_cape*_crv_jnt*','l_cape_cloth_crv',tsb = True)
+	#mc.skinCluster('*r_cape*_crv_jnt*','r_cape_cloth_crv',tsb = True)
+	#mc.skinCluster('*m_cape*_crv_jnt*','m_cape_cloth_crv',tsb = True)
+
+	#mc.select('*cape*cloth*_jnt*')
+	#mc.select('*l_cape*_crv_jnt*')
+
+	# Create the nCloth
+	mc.select(geoNcloth)
+	nClothShape = mel.eval( 'createNCloth 0' )[0]
+	mc.rename(nClothShape,geoNcloth + '_ncl')
+
+	# Create the nCloth constraints
+	cape_geo_list = ['%s.vtx[%s]' % (geoNcloth, n) for n in [5, 18, 39, 42, 54, 59, 180, 199, 202, 212, 217]]
+	mc.select(cape_geo_list)
+	nConstraintShape = mel.eval( 'createNConstraint transform 0' )
+	mc.rename(nConstraintShape,geoNcloth + '_const')
+
+	nRigid_list = []
+	for geo in collide_geo:
+		try:
+			collide = nCloth.createCollideMesh( geo, prefix = geo )
+			mc.setAttr(collide + '.inheritsTransform', 0)
+			nRigid_list.append(collide)
+		except Exception: pass
