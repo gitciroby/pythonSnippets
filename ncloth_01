@@ -1,0 +1,55 @@
+def makeNcloth():
+
+	renderGeo = ['cape_geo']
+	nClothModule = ['cape_nClothModule_grp']
+	cloth_curves = ['l_cape_cloth_crv','m_cape_cloth_crv','r_cape_cloth_crv']
+	parentClothCtl = 'spineChest3_ctl'
+	collide_geo = ['body_proxy_geo']
+
+	for geo in renderGeo:  
+
+		proxyGeoName = name.removeSuffix(geo) + '_proxy_geo'
+		geoName = name.removeSuffix(geo)
+		print proxyGeoName
+		geoNcloth = geoName + '_nCloth_geo'
+		geoSkin = geoName + '_skinned_geo'
+		geoProxyBls = 'proxy_capeFit_geo'
+		
+		# Duplicate the nCloth geo for the skinned and blend pieces
+		skinnedGeo =  mc.duplicate(proxyGeoName, name = geoSkin)
+		shape.fixNames(geoSkin)
+		
+		# Create the wrap
+		wrap.setupWrap(geo, geoSkin, prefix = name.removeSuffix(geo))
+		
+		# Create Blendshapes between capeFit and skinned cape
+		#blendShape.generateFromShapes( bsgeo = geoSkin, shapeobjects = [geoProxyBls], prefix = geoProxyBls)
+		#bsa = blendShape.getBlendShapeNodes( geoProxyBls + '_bls' )[0]
+		#print bsa
+		
+		#mc.setAttr(bsa + '.' + geoProxyBls, 1)
+		
+		nclothGeo = mc.duplicate(geoSkin, name = geoNcloth)
+		shape.fixNames(geoNcloth)
+		
+		# Create Blendshapes
+		blendShape.generateFromShapes( bsgeo = geoSkin, shapeobjects = [geoNcloth], prefix = geoSkin)
+		bs = blendShape.getBlendShapeNodes( geoSkin  + '_bls')[0]
+		print bs
+	   
+		mc.setAttr(bs + '.' + geoNcloth, 1)
+		
+		#Create main control
+		new_master_ctrl = control.Control(prefix = geoName + '_masterCloth', shape = 'cube', scale = sceneScale * 3, colorIdx = 31)
+		for axis in ['X', 'Y', 'Z']:
+			mc.setAttr(new_master_ctrl.C + '.translate' + axis, lock = True, keyable = False, cb = False)
+			mc.setAttr(new_master_ctrl.C + '.rotate' + axis, lock = True, keyable = False, cb = False)
+		mc.setAttr(new_master_ctrl.C + '.rotateOrder', lock = True, keyable = False, cb = False)
+		mc.addAttr(new_master_ctrl.C, longName = 'clothDynamics', at = 'float', min = 0.0, max = 1.0, keyable = True)
+		mc.addAttr(new_master_ctrl.C, longName = 'inputMeshAttract', at = 'float', min = 0.0, max = 1.0, keyable = True)
+		
+		mc.connectAttr(new_master_ctrl.C + '.clothDynamics', bs + '.weight[0]')        
+		#mc.connectAttr(new_ctrl.C + '.inputMeshAttract', 'clothpiece_{side}_nCloth_nclShape.inputMeshAttract'.format(side = side)) 
+
+	def makeHierarchyIkFk(fkCtlOff,ikCtlOff,fkCtl):
+		numCtl = len(fkCtlOff)
