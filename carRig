@@ -1,0 +1,42 @@
+import maya.cmds as mc
+import maya.mel as mm
+
+class Rig(object):       
+    def __init__(self,configNull='',module='rig', moduleType='generic', moduleNumber='',side=''):    
+    # create the config null if it does not exist        
+        
+        # TODO pass an error if the user tries to input a confignull AND use the optional arguments?
+        # TODO store attributes based on an incoming config null? .. or do this in MEL?        
+        # TODO add lodType and rigType attribute?                
+        # TODO note: the attribute names themselves on the confignull don't quite correspond to what's laid out in best practices        
+        # TODO change the inhertiance method in the sub rig modules (don't use super!!)
+        # TODO make a flag for if we want to create a module from scratch or not??
+       
+        if side != '':  # add an underscore to side just before assigning it so we don't have to do it when calling modules
+            side += '_'
+        
+        # create the config null if it does not exist
+        if mc.objExists(configNull) == 0:    
+            configNull = mm.eval('moduleCreateConfigNull("' + side + '", "' + module + '", "' + module + '", "' + moduleNumber + '")')                        
+            self.configNull = configNull            
+            self.encodeAttribute('lodType','string',vis=1,locked=0,description='the lod type')            
+            self.encodeAttribute('moduleType','string',vis=1,locked=0,description='the module type')                                                                                   
+            # TODO figure out what to call this, maybe we should still call it a socket?            
+            self.encodeAttribute('sockets','enum',default='base=default',description='list of available anchors')            
+            self.encodeAttribute('parentJoint','string',description='the joint which child modules will parent their joint hiearchies to')
+            self.encodeAttribute('connectsTo','string',description='the null that this rig will be attached to')                        
+        # read in attributes from the config null if one already exists
+        else:             
+            side = mc.getAttr(configNull + '.side')            
+            self.configNull = configNull
+            moduleNumber = mc.getAttr(configNull + '.moduleNumber')                                    
+            
+        self.module = module
+        self.moduleType = moduleType            
+        self.side = side            	
+        self.moduleNumber = moduleNumber
+        self.prefix = side + self.module + moduleNumber
+        self.anchors = ['root']
+            
+        # self.parentSuffix = 'socket'    
+        # self.childSuffix = 'plug'       
